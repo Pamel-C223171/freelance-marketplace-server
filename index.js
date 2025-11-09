@@ -23,6 +23,21 @@ async function run(){
 
         const db = client.db('freelance_db');
         const jobsCollection = db.collection('jobs');
+        const usersCollection = db.collection('users');
+
+        app.post('/users', async (req, res) => {
+    console.log('Got user from frontend:', req.body);
+    try {
+        const newUser = req.body;
+        const result = await usersCollection.insertOne(newUser);
+        res.send(result);
+    } catch (error) {
+        console.error('Error inserting user:', error);
+        res.status(500).send({ message: 'User insert failed' });
+    }
+});
+
+
 
         app.get('/jobs', async (req, res) => {
             const cursor = jobsCollection.find();
