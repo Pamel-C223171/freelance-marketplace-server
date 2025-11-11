@@ -44,6 +44,12 @@ async function run(){
             const result = await cursor.toArray();
             res.send(result);
         })
+       
+        app.get('/latest-jobs', async (req, res) => {
+            const cursor = jobsCollection.find().sort({postedAt: -1}).limit(6);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
 
         app.post('/jobs', async (req, res) => {
             const newJob = req.body;
