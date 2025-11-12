@@ -77,7 +77,10 @@ async function run(){
             const query = {_id: new ObjectId(id)}
             const update = {
                 $set: {
-                    userEmail: updateJob.userEmail
+                    title: updateJob.title,
+                    category: updateJob.category,
+                    summary: updateJob.summary,
+                    coverImage: updateJob.coverImage
                 }
             }
             const result = await jobsCollection.updateOne(query, update);
