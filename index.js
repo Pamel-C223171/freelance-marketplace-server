@@ -10,43 +10,44 @@ app.use(express.json());
 const uri = "mongodb+srv://freelance-marketplace:f2j2XS9UlpBXp18G@cluster0.zyhkinn.mongodb.net/?appName=Cluster0";
 
 const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
 });
 
-async function run(){
-    try{
+async function run() {
+    try {
         await client.connect();
 
         const db = client.db('freelance_db');
         const jobsCollection = db.collection('jobs');
         const usersCollection = db.collection('users');
+        const acceptedJobsCollection = db.collection('acceptedjob');
 
         app.post('/users', async (req, res) => {
-    console.log('Got user from frontend:', req.body);
-    try {
-        const newUser = req.body;
-        const result = await usersCollection.insertOne(newUser);
-        res.send(result);
-    } catch (error) {
-        console.error('Error inserting user:', error);
-        res.status(500).send({ message: 'User insert failed' });
-    }
-});
+            console.log('Got user from frontend:', req.body);
+            try {
+                const newUser = req.body;
+                const result = await usersCollection.insertOne(newUser);
+                res.send(result);
+            } catch (error) {
+                console.error('Error inserting user:', error);
+                res.status(500).send({ message: 'User insert failed' });
+            }
+        });
 
 
 
         app.get('/jobs', async (req, res) => {
-            const cursor = jobsCollection.find();
+            const cursor = jobsCollection.find().sort({ postedAt: -1 });
             const result = await cursor.toArray();
             res.send(result);
         })
-       
+
         app.get('/latest-jobs', async (req, res) => {
-            const cursor = jobsCollection.find().sort({postedAt: -1}).limit(6);
+            const cursor = jobsCollection.find().sort({ postedAt: -1 }).limit(6);
             const result = await cursor.toArray();
             res.send(result);
         })
@@ -54,46 +55,64 @@ async function run(){
         app.post('/jobs', async (req, res) => {
             const newJob = req.body;
             const result = await jobsCollection.insertOne(newJob);
-            res.send(result); 
+            res.send(result);
         })
 
-        app.get('/jobs/:id', async (req, res) =>  {
+        app.get('/jobs/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await jobsCollection.findOne(query);
             res.send(result);
         })
 
-        app.delete('/jobs/:id', async (req, res) =>  {
+        app.delete('/jobs/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await jobsCollection.deleteOne(query);
             res.send(result);
         })
 
-        app.patch('/jobs/:id', async (req, res) =>  {
+        app.patch('/jobs/:id', async (req, res) => {
             const id = req.params.id;
             const updateJob = req.body;
-            const query = {_id: new ObjectId(id)}
-            const update = {
-                $set: {
-                    title: updateJob.title,
-                    category: updateJob.category,
-                    summary: updateJob.summary,
-                    coverImage: updateJob.coverImage
-                }
-            }
+            const query = { _id: new ObjectId(id) }
+            const updateFields = {};
+
+            if(updateJob.title) updateFields.title = updateJob.title;
+            if(updateJob.category) updateFields.category = updateJob.category;
+            if(updateJob.summary) updateFields.summay = updateJob.summay;
+            if(updateJob.coverImage) updateFields.coverImage = updateJob.coverImage;
+            if(updateJob.acceptedBy) updateFields.acceptedBy = updateJob.acceptedBy;
+            if(updateJob.status) updateFields.status = updateJob.status;
+               
+            const update = { $set: updateFields};
+            
             const result = await jobsCollection.updateOne(query, update);
             res.send(result);
         })
 
-        await client.db('admin').command({ping: 1});
+        app.get('/jobs/:id', async (req, res) => {
+            const id = req.params.id;
+            const job = await jobsCollection.findOne({ _id: new ObjectId(id) });
+            res.send(job)
+        })
+
+        app.get('/myacceptedjob', async (req, res) => {
+            const result = await acceptedJobsCollection.find().toArray();
+            res.send(result);
+        })
+
+        
+    
+
+
+        await client.db('admin').command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     }
     finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
-  }
+        // Ensures that the client will close when you finish/error
+        // await client.close();
+    }
 }
 run().catch(console.dir);
 
