@@ -1,5 +1,6 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+require('dotenv').config()
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -7,7 +8,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const uri = "mongodb+srv://freelance-marketplace:f2j2XS9UlpBXp18G@cluster0.zyhkinn.mongodb.net/?appName=Cluster0";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}G@cluster0.zyhkinn.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -101,10 +102,6 @@ async function run() {
             const result = await acceptedJobsCollection.find().toArray();
             res.send(result);
         })
-
-        
-    
-
 
         await client.db('admin').command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
