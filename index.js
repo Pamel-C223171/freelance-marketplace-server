@@ -35,7 +35,7 @@ async function run() {
                 res.send(result);
             } catch (error) {
                 console.error('Error inserting user:', error);
-                res.status(500).send({ message: 'User insert failed' });
+                res.status(500).send({ message: 'User insert failed'});
             }
         });
 
@@ -103,7 +103,7 @@ async function run() {
             res.send(result);
         })
 
-        await client.db('admin').command({ ping: 1 });
+        // await client.db('admin').command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     }
     finally {
