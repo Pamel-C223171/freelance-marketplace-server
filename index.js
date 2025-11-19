@@ -18,9 +18,8 @@ const client = new MongoClient(uri, {
     }
 });
 
-async function run() {
-    try {
-        await client.connect();
+ try {
+         client.connect();
 
         const db = client.db('freelance_db');
         const jobsCollection = db.collection('jobs');
@@ -110,8 +109,6 @@ async function run() {
         // Ensures that the client will close when you finish/error
         // await client.close();
     }
-}
-run().catch(console.dir);
 
 app.get('/', (req, res) => {
     res.send('Freelance MarketPlace Server is Running');
